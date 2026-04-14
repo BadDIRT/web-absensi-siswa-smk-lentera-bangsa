@@ -13,6 +13,51 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Daftar role yang tersedia di sistem.
+     */
+    public const ROLE_ADMINISTRATOR = 'administrator';
+    public const ROLE_SCANNER       = 'scanner';
+    public const ROLE_SISWA         = 'siswa';
+
+    /**
+     * Daftar role beserta labelnya.
+     */
+    public static function roleLabels(): array
+    {
+        return [
+            self::ROLE_ADMINISTRATOR => 'Administrator',
+            self::ROLE_SCANNER       => 'Scanner',
+            self::ROLE_SISWA         => 'Siswa',
+        ];
+    }
+
+    /**
+     * Mendapatkan label role dari user ini.
+     */
+    public function roleLabel(): string
+    {
+        return self::roleLabels()[$this->role] ?? 'Tidak Diketahui';
+    }
+
+    /**
+     * Cek apakah user memiliki role tertentu.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Override: gunakan kolom 'username' untuk login (bukan email).
+     */
+    public function username(): string
+    {
+        return 'username';
+    }
+
+
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -21,6 +66,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'username',
     ];
 
     /**
