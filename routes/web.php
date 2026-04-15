@@ -2,11 +2,21 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\JurusanController;
+use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\BarcodeController;
+use App\Http\Controllers\Admin\RekapController;
+use App\Http\Controllers\Admin\PengaturanController;
+use App\Http\Controllers\Scanner\ScanController;
+use App\Http\Controllers\Scanner\RiwayatController as ScannerRiwayatController;
+use App\Http\Controllers\Siswa\RiwayatController as SiswaRiwayatController;
+use App\Http\Controllers\Siswa\ProfilController as SiswaProfilController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Routes Publik — Login / Logout
+| Publik
 |--------------------------------------------------------------------------
 */
 
@@ -16,44 +26,52 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::get('/', fn() => redirect()->route('login'));
 
 /*
 |--------------------------------------------------------------------------
-| Routes Dashboard — Dilindungi autentikasi + role
+| Dashboard
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:administrator'])->group(function () {
-    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+Route::middleware(['auth', 'role:administrator'])->get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+Route::middleware(['auth', 'role:scanner'])->get('/dashboard/scanner', [DashboardController::class, 'scanner'])->name('dashboard.scanner');
+Route::middleware(['auth', 'role:siswa'])->get('/dashboard/siswa', [DashboardController::class, 'siswa'])->name('dashboard.siswa');
 
-    // ── Placeholder routes untuk fitur admin (akan diimplementasi nanti) ──
-    // Route::resource('siswa', SiswaController::class);
-    // Route::resource('kelas', KelasController::class);
-    // Route::resource('jurusan', JurusanController::class);
-    // Route::get('absensi/rekap', [AbsensiController::class, 'rekap'])->name('absensi.rekap');
-    // Route::get('barcode/generate', [BarcodeController::class, 'generate'])->name('barcode.generate');
-    // Route::resource('pengguna', PenggunaController::class);
-});
-
-Route::middleware(['auth', 'role:scanner'])->group(function () {
-    Route::get('/dashboard/scanner', [DashboardController::class, 'scanner'])->name('dashboard.scanner');
-
-    // ── Placeholder routes untuk fitur scanner ──
-    // Route::get('scan/riwayat', [ScanController::class, 'riwayat'])->name('scan.riwayat');
-});
-
-Route::middleware(['auth', 'role:siswa'])->group(function () {
-    Route::get('/dashboard/siswa', [DashboardController::class, 'siswa'])->name('dashboard.siswa');
-
-    // ── Placeholder routes untuk fitur siswa ──
-    // Route::get('absensi/riwayat', [SiswaAbsensiController::class, 'riwayat'])->name('siswa.absensi.riwayat');
-    // Route::get('profil', [SiswaProfilController::class, 'index'])->name('siswa.profil');
+/*
+|--------------------------------------------------------------------------
+| Administrator
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('jurusan', JurusanController::class)->except('show');
+    Route::resource('kelas', KelasController::class)->except('show')->parameters(['kelas' => 'kela']);
+    Route::resource('siswa', SiswaController::class)->except('show');
+    Route::get('barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+    Route::post('barcode/generate-all', [BarcodeController::class, 'generateAll'])->name('barcode.generate-all');
+    Route::post('barcode/{siswa}/generate', [BarcodeController::class, 'generateSingle'])->name('barcode.generate');
+    Route::get('barcode/print', [BarcodeController::class, 'print'])->name('barcode.print');
+    Route::get('rekap', [RekapController::class, 'index'])->name('rekap.index');
+    Route::get('rekap/detail', [RekapController::class, 'detail'])->name('rekap.detail');
+    Route::resource('pengaturan', PengaturanController::class)->except('show')->parameters(['pengaturan' => 'user']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| Redirect root ke login
+| Scanner
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::middleware(['auth', 'role:scanner'])->prefix('scanner')->name('scanner.')->group(function () {
+    Route::get('riwayat', [ScannerRiwayatController::class, 'index'])->name('riwayat.index');
+    Route::post('process', [ScanController::class, 'process'])->name('process');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Siswa
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
+    Route::get('riwayat', [SiswaRiwayatController::class, 'index'])->name('siswa.riwayat.index');
+    Route::get('profil', [SiswaProfilController::class, 'index'])->name('siswa.profil.index');
+    Route::put('profil', [SiswaProfilController::class, 'update'])->name('siswa.profil.update');
 });

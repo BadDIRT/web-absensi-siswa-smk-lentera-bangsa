@@ -14,47 +14,53 @@
                 <div>
                     <p class="text-sm font-medium text-brand-200">Selamat Datang,</p>
                     <h2 class="mt-1 text-2xl font-bold text-white">{{ $user->name }}</h2>
-                    <p class="mt-1 text-sm text-brand-200/70">NIS: {{ $user->username ?? '—' }}</p>
+                    @if ($siswa)
+                        <p class="mt-1 text-sm text-brand-200/70">NIS: {{ $siswa->nis }} · {{ $siswa->kelas->nama }}</p>
+                    @else
+                        <p class="mt-1 text-sm text-brand-200/70">Akun belum terhubung dengan data siswa.</p>
+                    @endif
                 </div>
-                {{-- Status hari ini --}}
+                @php
+                    $sudahAbsen = $siswa
+                        ? \App\Models\Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->exists()
+                        : false;
+                @endphp
                 <div
-                    class="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10">
-                    <span class="flex h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-                    <span class="text-sm font-medium text-white">Belum Absen Hari Ini</span>
+                    class="flex items-center gap-2 rounded-lg px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10
+                {{ $sudahAbsen ? 'bg-green-500/20' : 'bg-white/10' }}">
+                    <span class="flex h-2.5 w-2.5 rounded-full {{ $sudahAbsen ? 'bg-green-400' : 'bg-amber-400' }}"></span>
+                    <span
+                        class="text-sm font-medium text-white">{{ $sudahAbsen ? 'Sudah Absen Hari Ini' : 'Belum Absen Hari Ini' }}</span>
                 </div>
             </div>
         </div>
 
         {{-- ── Statistik Bulan Ini ── --}}
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-
             <div class="rounded-xl border border-green-100 bg-green-50 p-4 text-center">
                 <p class="text-2xl font-bold text-green-700">{{ $absensiBulanIni['hadir'] }}</p>
                 <p class="mt-1 text-xs font-medium text-green-600">Hadir</p>
             </div>
-
             <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-center">
                 <p class="text-2xl font-bold text-blue-700">{{ $absensiBulanIni['izin'] }}</p>
                 <p class="mt-1 text-xs font-medium text-blue-600">Izin</p>
             </div>
-
             <div class="rounded-xl border border-amber-100 bg-amber-50 p-4 text-center">
                 <p class="text-2xl font-bold text-amber-700">{{ $absensiBulanIni['sakit'] }}</p>
                 <p class="mt-1 text-xs font-medium text-amber-600">Sakit</p>
             </div>
-
             <div class="rounded-xl border border-red-100 bg-red-50 p-4 text-center">
                 <p class="text-2xl font-bold text-red-700">{{ $absensiBulanIni['alpa'] }}</p>
                 <p class="mt-1 text-xs font-medium text-red-600">Alpa</p>
             </div>
-
         </div>
 
-        {{-- ── Riwayat Absensi ── --}}
+        {{-- ── Riwayat Absensi Terbaru ── --}}
         <div class="rounded-xl border border-gray-200 bg-white">
             <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                 <h3 class="text-sm font-semibold text-gray-800">Riwayat Absensi</h3>
-                <span class="text-xs text-gray-400">Bulan {{ date('F Y') }}</span>
+                <a href="{{ route('siswa.riwayat.index') }}"
+                    class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat Semua →</a>
             </div>
 
             <div class="overflow-x-auto">
@@ -64,13 +70,33 @@
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Tanggal</th>
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Jam Masuk
                             </th>
-                            <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
+                            <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400 text-center">
+                                Status</th>
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Keterangan
                             </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
-                        @if ($riwayatAbsensi->isEmpty())
+                        @forelse($riwayatAbsensi->take(5) as $absensi)
+                            @php
+                                $color = match ($absensi->status) {
+                                    'hadir' => 'bg-green-50 text-green-700',
+                                    'izin' => 'bg-blue-50 text-blue-700',
+                                    'sakit' => 'bg-amber-50 text-amber-700',
+                                    'alpa' => 'bg-red-50 text-red-700',
+                                    default => 'bg-gray-50 text-gray-500',
+                                };
+                            @endphp
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-3.5 text-gray-700">{{ $absensi->tanggal->format('d M Y') }}</td>
+                                <td class="px-6 py-3.5 font-mono text-xs text-gray-600">{{ $absensi->jam_masuk }}</td>
+                                <td class="px-6 py-3.5 text-center">
+                                    <span
+                                        class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $color }}">{{ $absensi->statusLabel() }}</span>
+                                </td>
+                                <td class="px-6 py-3.5 text-gray-400">{{ $absensi->keterangan ?? '—' }}</td>
+                            </tr>
+                        @empty
                             <tr>
                                 <td colspan="4" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center">
@@ -78,29 +104,17 @@
                                             class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-300 mb-3">
                                             <x-icon name="clock" class="w-5 h-5" />
                                         </div>
-                                        <p class="text-sm text-gray-400">Belum ada data absensi</p>
-                                        <p class="mt-0.5 text-xs text-gray-300">Data akan muncul setelah Anda melakukan
-                                            absensi.</p>
+                                        <p class="text-sm text-gray-400">Belum ada data absensi bulan ini</p>
                                     </div>
                                 </td>
                             </tr>
-                        @else
-                            @foreach ($riwayatAbsensi as $absensi)
-                                {{-- Placeholder row --}}
-                                <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="px-6 py-3.5 text-gray-700">{{ $absensi->tanggal ?? '—' }}</td>
-                                    <td class="px-6 py-3.5 text-gray-700">{{ $absensi->jam_masuk ?? '—' }}</td>
-                                    <td class="px-6 py-3.5">{{ $absensi->status ?? '—' }}</td>
-                                    <td class="px-6 py-3.5 text-gray-400">{{ $absensi->keterangan ?? '-' }}</td>
-                                </tr>
-                            @endforeach
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- ── Info: Cara Absensi ── --}}
+        {{-- ── Info Cara Absensi ── --}}
         <div class="rounded-xl border border-brand-100 bg-brand-50/50 p-5">
             <div class="flex gap-4">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-600">
