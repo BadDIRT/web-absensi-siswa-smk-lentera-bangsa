@@ -16,10 +16,10 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-blue-800">Format Barcode CODABAR</p>
+                    <p class="text-sm font-semibold text-blue-800">Format Barcode Code 128</p>
                     <p class="mt-0.5 text-xs text-blue-700/70 leading-relaxed">
-                        Kartu absensi siswa menggunakan Barcode 1D tipe CODABAR yang berisi NIPD (diapit huruf A).
-                        Pastikan scanner fisik mendukung pembacaan format CODABAR dan posisi barcode lurus menghadap
+                        Kartu absensi siswa menggunakan Barcode 1D tipe Code 128 yang berisi NIPD (diapit huruf A).
+                        Pastikan scanner fisik mendukung pembacaan format Code 128 dan posisi barcode lurus menghadap
                         scanner.
                     </p>
                 </div>
@@ -33,37 +33,15 @@
                     <x-icon name="barcode" class="w-5 h-5" />
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-gray-800">Generate & Cetak Kartu Absensi</p>
-                    <p class="text-xs text-gray-400">
-                        @if ($belumPunyaBarcode > 0)
-                            <span class="font-medium text-amber-600">{{ $belumPunyaBarcode }} siswa</span> belum memiliki
-                            kode
-                        @else
-                            Semua siswa aktif yang punya NIPD sudah memiliki kode
-                        @endif
-                    </p>
+                    <p class="text-sm font-semibold text-gray-800">Kelola Kartu Absensi</p>
+                    <p class="text-xs text-gray-400">Generate kode per siswa atau cetak kartu absensi</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <form method="POST" action="{{ route('admin.barcode.generate-all') }}"
-                    onsubmit="return confirm('Generate kode untuk semua siswa yang belum punya?')">
-                    @csrf
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                        {{ $belumPunyaBarcode === 0 ? 'disabled' : '' }}>
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        Generate Semua
-                    </button>
-                </form>
-                <a href="{{ route('admin.barcode.print') }}" target="_blank"
-                    class="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-700 active:scale-[0.98]">
-                    <x-icon name="print" class="w-4 h-4" />
-                    Cetak / Download
-                </a>
-            </div>
+            <a href="{{ route('admin.barcode.print', array_filter(['kelas_id' => request('kelas_id')])) }}" target="_blank"
+                class="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-gray-700 active:scale-[0.98]">
+                <x-icon name="print" class="w-4 h-4" />
+                Cetak / Download
+            </a>
         </div>
 
         {{-- ── Filter ── --}}
@@ -133,7 +111,7 @@
                             {{-- KOLOM BARCODE --}}
                             <td class="px-5 py-3">
                                 @if ($siswa->no_barcode)
-                                    <img src="data:image/png;base64, {{ base64_encode($generator->getBarcode($siswa->no_barcode, $generator::TYPE_CODABAR, 2, 40)) }}"
+                                    <img src="data:image/png;base64, {{ base64_encode($generator->getBarcode($siswa->no_barcode, $generator::TYPE_CODE_128, 2, 40)) }}"
                                         alt="Barcode {{ $siswa->nipd }}"
                                         class="h-10 w-auto rounded border border-gray-100">
                                 @else

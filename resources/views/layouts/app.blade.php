@@ -7,6 +7,8 @@
     <meta name="description" content="Sistem Absensi Siswa SMK Lentera Bangsa">
 
     <title>@yield('title', 'Absensi — SMK Lentera Bangsa')</title>
+    <link rel="icon" type="image/png" href="{{ Vite::asset('resources/images/logo.png') }}">
+
 
     {{-- Font: Outfit dari Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

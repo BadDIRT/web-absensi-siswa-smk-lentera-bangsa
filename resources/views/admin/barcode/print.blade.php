@@ -5,203 +5,246 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title }} — SMK Lentera Bangsa</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background: #fff;
-            color: #1a1a1a;
-            padding: 20mm;
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
-        .print-header {
+        /* ── Toolbar (hidden saat print) ── */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 24px;
-            margin-bottom: 24px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            gap: 16px;
         }
 
-        .print-header h1 {
-            font-size: 16px;
-            font-weight: 700;
+        .toolbar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
         }
 
-        .print-header p {
-            font-size: 13px;
-            color: #64748b;
+        .toolbar-subtitle {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
         }
 
-        .print-header button {
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 20px;
-            background: #16a34a;
-            color: #fff;
+            padding: 8px 20px;
+            background: #111827;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
             border: none;
             border-radius: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
             cursor: pointer;
+            transition: background 0.15s;
         }
 
-        .print-header button:hover {
-            background: #15803d;
+        .btn-print:hover {
+            background: #1f2937;
         }
 
-        .school-header {
-            display: none;
-            text-align: center;
-            margin-bottom: 8mm;
-            padding-bottom: 4mm;
-            border-bottom: 2px solid #000;
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
         }
 
-        .school-header h2 {
-            font-size: 16pt;
-            font-weight: 700;
-            letter-spacing: 1px;
+        .btn-back:hover {
+            background: #f9fafb;
         }
 
-        .school-header p {
-            font-size: 10pt;
-            color: #444;
-            margin-top: 2mm;
+        /* ── Container ── */
+        .print-container {
+            max-width: 1080px;
+            margin: 24px auto;
+            padding: 0 24px 48px;
         }
 
-        .barcode-grid {
+        /* ── Grid Kartu ── */
+        .card-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5mm;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
 
-        .barcode-card {
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 4mm;
-            text-align: center;
+        /* ── Kartu ── */
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
             page-break-inside: avoid;
             break-inside: avoid;
         }
 
-        .barcode-card .school-name {
-            font-size: 7pt;
-            font-weight: 700;
-            color: #16a34a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2mm;
+        .card-header {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .barcode-card .student-name {
-            font-size: 10.5pt;
+        .card-header .school-name {
+            color: white;
+            font-size: 11px;
             font-weight: 700;
-            color: #111;
+            letter-spacing: 0.03em;
             line-height: 1.3;
-            margin-bottom: 1mm;
         }
 
-        .barcode-card .student-info {
-            font-size: 7.5pt;
-            color: #666;
-            margin-bottom: 3mm;
-            line-height: 1.4;
+        .card-header .card-label {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 8px;
+            border-radius: 4px;
         }
 
-        .barcode-card .qr-wrapper {
+        .card-body {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-identities {
             display: flex;
             justify-content: center;
-            margin-bottom: 2mm;
+            gap: 12px;
+            margin-bottom: 14px;
         }
 
-        .barcode-card .qr-wrapper img {
-            width: 28mm;
-            height: 28mm;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+        .card-identity {
+            font-size: 10px;
+            color: #6b7280;
         }
 
-        .barcode-card .cut-line {
-            margin-top: 3mm;
-            border-top: 1.5px dashed #94a3b8;
-            padding-top: 3mm;
+        .card-identity strong {
+            color: #374151;
+            font-weight: 600;
         }
 
-        .barcode-card .nipd-label {
-            font-size: 7pt;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1mm;
+        .card-kelas {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #1e40af;
+            background: #eff6ff;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 14px;
         }
 
-        .barcode-card .nipd-value {
-            font-size: 13pt;
-            font-weight: 800;
-            font-family: 'JetBrains Mono', monospace;
-            color: #111;
-            letter-spacing: 2px;
+        .card-barcode {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding-top: 12px;
+            border-top: 1px dashed #e5e7eb;
         }
 
-        .barcode-card .scan-hint {
-            font-size: 6pt;
-            color: #b0b0b0;
-            margin-top: 1.5mm;
+        .card-barcode img {
+            height: 52px;
+            width: auto;
         }
 
-        @media (max-width: 900px) {
-            .barcode-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .card-barcode-code {
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            color: #9ca3af;
+            letter-spacing: 0.05em;
         }
 
-        @media (max-width: 600px) {
-            .barcode-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            body {
-                padding: 10mm;
-            }
-        }
-
+        /* ── Print ── */
         @media print {
             @page {
                 size: A4;
-                margin: 10mm;
+                margin: 12mm;
             }
 
             body {
-                padding: 0;
+                background: white;
             }
 
-            .print-header {
+            .toolbar {
                 display: none !important;
             }
 
-            .school-header {
-                display: block !important;
+            .print-container {
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
             }
 
-            .barcode-card {
-                border-color: #ccc;
+            .card-grid {
+                gap: 10px;
+            }
+
+            .card {
+                border: 1px solid #d1d5db;
+            }
+
+            .card-header {
+                background: #1e40af !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -209,47 +252,56 @@
 
 <body>
 
-    <div class="print-header">
+    {{-- ── Toolbar ── --}}
+    <div class="toolbar">
         <div>
-            <h1>{{ $title }}</h1>
-            <p>{{ $siswas->count() }} siswa</p>
+            <div class="toolbar-title">{{ $title }}</div>
+            <div class="toolbar-subtitle">{{ $siswas->count() }} siswa</div>
         </div>
-        <button onclick="window.print()">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.75 7.131s0 0 0 0" />
-            </svg>
-            Cetak / Save PDF
-        </button>
+        <div class="toolbar-actions">
+            <a href="javascript:history.back()" class="btn-back">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+                Kembali
+            </a>
+            <button onclick="window.print()" class="btn-print">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.75 7.131H5.25" />
+                </svg>
+                Cetak
+            </button>
+        </div>
     </div>
 
-    <div class="school-header">
-        <h2>SMK LENTERA BANGSA</h2>
-        <p>Kartu Absensi Siswa</p>
-    </div>
-
-    <div class="barcode-grid">
-        @foreach ($siswas as $siswa)
-            <div class="barcode-card">
-                <div class="school-name">SMK Lentera Bangsa</div>
-                <div class="student-name">{{ $siswa->nama }}</div>
-                <div class="student-info">
-                    NIS: {{ $siswa->nis }} · {{ $siswa->kelas->nama }}
+    {{-- ── Kartu ── --}}
+    <div class="print-container">
+        <div class="card-grid">
+            @foreach ($siswas as $siswa)
+                <div class="card">
+                    <div class="card-header">
+                        <span class="school-name">SMK Lentera<br>Bangsa</span>
+                        <span class="card-label">Kartu Absensi</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-name" title="{{ $siswa->nama }}">{{ $siswa->nama }}</div>
+                        <div class="card-identities">
+                            <span class="card-identity">NIS <strong>{{ $siswa->nis }}</strong></span>
+                            <span class="card-identity">NIPD <strong>{{ $siswa->nipd ?? '—' }}</strong></span>
+                        </div>
+                        <span class="card-kelas">{{ $siswa->kelas->nama }}</span>
+                        <div class="card-barcode">
+                            <img src="data:image/png;base64, {{ base64_encode($generator->getBarcode($siswa->no_barcode, $generator::TYPE_CODE_128, 2, 52)) }}"
+                                alt="Barcode {{ $siswa->no_barcode }}">
+                            <span class="card-barcode-code">{{ $siswa->no_barcode }}</span>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="qr-wrapper">
-                    <img src="{{ route('admin.barcode.download', $siswa) }}" alt="QR Code {{ $siswa->nipd }}">
-                </div>
-
-                <div class="cut-line">
-                    <div class="nipd-label">NIPD</div>
-                    <div class="nipd-value">{{ $siswa->nipd }}</div>
-                </div>
-
-                <div class="scan-hint">Scan QR code untuk absensi</div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 
 </body>

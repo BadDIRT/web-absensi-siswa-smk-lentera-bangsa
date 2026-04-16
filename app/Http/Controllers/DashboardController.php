@@ -12,15 +12,35 @@ class DashboardController extends Controller
 {
     public function admin()
     {
+        $tanggal = today();
+        $totalSiswaAktif = Siswa::where('status', 'aktif')->count();
+
+        $hadirHariIni = Absensi::where('tanggal', $tanggal)->where('status', 'hadir')->count();
+
+        // Siswa yang sudah punya record absensi apapun hari ini
+        $sudahDiabsen = Absensi::where('tanggal', $tanggal)->distinct('siswa_id')->count('siswa_id');
+
+        // Belum absen = siswa aktif yang belum ada baris di tabel absensis hari ini
+        $belumAbsen = max(0, $totalSiswaAktif - $sudahDiabsen);
+
+        // Izin + Sakit + Alpa
+        $izinSakitAlpa = Absensi::where('tanggal', $tanggal)
+            ->whereIn('status', ['izin', 'sakit', 'alpa'])
+            ->count();
+
+        // Tidak hadir = izin/sakit/alpa + belum absen sama sekali
+        $tidakHadir = $izinSakitAlpa + $belumAbsen;
+
         return view('dashboard.admin', [
             'stats' => [
-                'total_siswa'    => Siswa::where('status', 'aktif')->count(),
-                'hadir_hari_ini' => Absensi::where('tanggal', today())->where('status', 'hadir')->count(),
-                'tidak_hadir'    => Absensi::where('tanggal', today())->whereIn('status', ['izin', 'sakit', 'alpa'])->count(),
+                'total_siswa'    => $totalSiswaAktif,
+                'hadir_hari_ini' => $hadirHariIni,
+                'tidak_hadir'    => $tidakHadir,
+                'belum_absen'    => $belumAbsen,
                 'total_kelas'    => Kelas::count(),
             ],
             'absensiTerakhir' => Absensi::with('siswa.kelas')
-                ->where('tanggal', today())
+                ->where('tanggal', $tanggal)
                 ->latest('jam_masuk')
                 ->take(5)
                 ->get(),

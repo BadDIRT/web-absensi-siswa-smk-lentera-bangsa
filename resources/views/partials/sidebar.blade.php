@@ -12,6 +12,7 @@
             ['label' => 'Barcode Siswa', 'icon' => 'barcode', 'route' => 'admin.barcode.index'],
             ['label' => 'Cetak Barcode', 'icon' => 'print', 'route' => 'admin.barcode.print'], // ← tambahkan
             ['label' => 'Rekap Absensi', 'icon' => 'chart', 'route' => 'admin.rekap.index'],
+            ['label' => 'Naik / Turun Kelas', 'icon' => 'arrow-up', 'route' => 'admin.naik-kelas.index'],
             ['label' => 'Pengaturan', 'icon' => 'gear', 'route' => 'admin.pengaturan.index'],
         ],
         'scanner' => [
@@ -47,12 +48,12 @@
 
     {{-- ── Brand Area ── --}}
     <div class="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-            <x-icon name="lentera" class="w-5 h-5" />
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-white">
+            <img src="{{ Vite::asset('resources/images/logo.png') }}" alt="Logo SMK Lentera Bangsa">
         </div>
         <div class="flex flex-col">
             <span class="text-sm font-bold leading-tight text-white tracking-wide">SMK Lentera Bangsa</span>
-            <span class="text-[10px] font-medium uppercase tracking-widest text-brand-400">Sistem Absensi</span>
+            <span class="text-[10px] font-medium uppercase tracking-widest text-red-400">Sistem Absensi</span>
         </div>
         <button class="ml-auto rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white lg:hidden"
             @click="sidebarOpen = false" aria-label="Tutup sidebar">

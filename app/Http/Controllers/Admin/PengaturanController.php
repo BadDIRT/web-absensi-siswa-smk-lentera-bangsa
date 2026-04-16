@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +27,9 @@ class PengaturanController extends Controller
 
     public function create()
     {
-        return view('admin.pengaturan.form');
+        return view('admin.pengaturan.form', [
+            'user' => null,
+        ]);
     }
 
     public function store(Request $request)
@@ -44,6 +47,55 @@ class PengaturanController extends Controller
         User::create($validated);
 
         return redirect()->route('admin.pengaturan.index')->with('success', 'Pengguna berhasil ditambahkan.');
+    }
+
+    public function show(User $user)
+    {
+        // Load relasi siswa hanya jika role-nya siswa
+        $siswa = null;
+        if ($user->role === 'siswa') {
+            $siswa = $user->siswa?->load('kelas.jurusan');
+        }
+
+        $bulan = now()->format('Y-m');
+        $absensis = collect();
+        $stats = ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpa' => 0];
+        $scanHariIni = 0;
+        $totalScan = 0;
+
+        // Data absensi jika siswa yang punya data siswa
+        if ($siswa) {
+            $absensis = Absensi::where('siswa_id', $siswa->id)
+                ->whereRaw("DATE_FORMAT(tanggal, '%Y-%m') = ?", [$bulan])
+                ->orderByDesc('tanggal')
+                ->get();
+
+            $stats = [
+                'hadir' => $absensis->where('status', 'hadir')->count(),
+                'izin'  => $absensis->where('status', 'izin')->count(),
+                'sakit' => $absensis->where('status', 'sakit')->count(),
+                'alpa'  => $absensis->where('status', 'alpa')->count(),
+            ];
+        }
+
+        // Statistik scan jika role scanner
+        if ($user->role === 'scanner') {
+            $scanHariIni = Absensi::where('scanned_by', $user->id)
+                ->where('tanggal', today())
+                ->count();
+
+            $totalScan = Absensi::where('scanned_by', $user->id)->count();
+        }
+
+        return view('admin.pengaturan.show', compact(
+            'user',
+            'siswa',
+            'absensis',
+            'stats',
+            'bulan',
+            'scanHariIni',
+            'totalScan'
+        ));
     }
 
     public function edit(User $user)
@@ -74,7 +126,6 @@ class PengaturanController extends Controller
 
     public function destroy(User $user)
     {
-        // Cegah hapus akun sendiri
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Tidak dapat menghapus akun yang sedang digunakan.');
         }

@@ -25,12 +25,25 @@
                         ? \App\Models\Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->exists()
                         : false;
                 @endphp
-                <div
-                    class="flex items-center gap-2 rounded-lg px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10
-                {{ $sudahAbsen ? 'bg-green-500/20' : 'bg-white/10' }}">
-                    <span class="flex h-2.5 w-2.5 rounded-full {{ $sudahAbsen ? 'bg-green-400' : 'bg-amber-400' }}"></span>
-                    <span
-                        class="text-sm font-medium text-white">{{ $sudahAbsen ? 'Sudah Absen Hari Ini' : 'Belum Absen Hari Ini' }}</span>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div
+                        class="flex items-center gap-2 rounded-lg px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10
+                    {{ $sudahAbsen ? 'bg-green-500/20' : 'bg-white/10' }}">
+                        <span
+                            class="flex h-2.5 w-2.5 rounded-full {{ $sudahAbsen ? 'bg-green-400' : 'bg-amber-400' }}"></span>
+                        <span class="text-sm font-medium text-white">
+                            {{ $sudahAbsen ? 'Sudah Absen Hari Ini' : 'Belum Absen Hari Ini' }}
+                        </span>
+                    </div>
+
+                    {{-- TOMBOL AJUKAN IZIN/SAKIT (Hanya muncul jika belum absen dan akun terhubung siswa) --}}
+                    @if (!$sudahAbsen && $siswa)
+                        <a href="{{ route('siswa.pengajuan.create') }}"
+                            class="inline-flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/30 transition-colors">
+                            <x-icon name="document-text" class="w-4 h-4" />
+                            Ajukan Izin/Sakit
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

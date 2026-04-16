@@ -41,40 +41,9 @@ class BarcodeController extends Controller
 
         $kelases = Kelas::with('jurusan')->orderBy('nama')->get();
 
-        $belumPunyaBarcode = Siswa::where('status', 'aktif')
-            ->whereNotNull('nipd')
-            ->where('nipd', '!=', '')
-            ->whereNull('no_barcode')
-            ->count();
-
-        // Inisialisasi Barcode Generator
         $generator = new BarcodeGeneratorPNG();
 
-        return view('admin.barcode.index', compact('siswas', 'kelases', 'belumPunyaBarcode', 'generator'));
-    }
-
-    /**
-     * POST /admin/barcode/generate-all
-     */
-    public function generateAll(Request $request)
-    {
-        $siswas = Siswa::where('status', 'aktif')
-            ->whereNotNull('nipd')
-            ->where('nipd', '!=', '')
-            ->whereNull('no_barcode')
-            ->get();
-
-        if ($siswas->isEmpty()) {
-            return back()->with('error', 'Tidak ada siswa yang perlu digenerate kode-nya.');
-        }
-
-        $count = 0;
-        foreach ($siswas as $siswa) {
-            $siswa->update(['no_barcode' => Siswa::generateBarcode($siswa->nipd)]);
-            $count++;
-        }
-
-        return back()->with('success', "{$count} kode berhasil digenerate.");
+        return view('admin.barcode.index', compact('siswas', 'kelases', 'generator'));
     }
 
     /**

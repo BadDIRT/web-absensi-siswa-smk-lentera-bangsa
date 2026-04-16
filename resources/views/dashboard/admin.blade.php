@@ -9,7 +9,8 @@
         {{-- ── Welcome Banner ── --}}
         <div
             class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-800 to-surface-800 p-6 md:p-8">
-            <div class="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-brand-500/10 blur-3xl"></div>
+            <div class="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-brand-500/10 blur-3xl">
+            </div>
             <div class="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-accent-500/8 blur-3xl">
             </div>
             <div class="relative">
@@ -24,12 +25,14 @@
         {{-- ── Statistik Cards ── --}}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
+            {{-- Total Siswa --}}
             <div
                 class="group rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-lg hover:shadow-brand-500/5 hover:border-brand-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Siswa</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['total_siswa']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            {{ number_format($stats['total_siswa']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-100">
@@ -39,12 +42,14 @@
                 <div class="mt-3 text-xs text-gray-400">Terdaftar aktif</div>
             </div>
 
+            {{-- Hadir Hari Ini --}}
             <div
                 class="group rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/5 hover:border-green-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Hadir Hari Ini</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['hadir_hari_ini']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            {{ number_format($stats['hadir_hari_ini']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100">
@@ -57,12 +62,14 @@
                 <div class="mt-3 text-xs text-green-600">Kehadiran {{ date('d M Y') }}</div>
             </div>
 
+            {{-- Tidak Hadir --}}
             <div
                 class="group rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/5 hover:border-red-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Tidak Hadir</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['tidak_hadir']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            {{ number_format($stats['tidak_hadir']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors group-hover:bg-red-100">
@@ -72,15 +79,24 @@
                         </svg>
                     </div>
                 </div>
-                <div class="mt-3 text-xs text-red-500">Izin, Sakit, Alpa</div>
+                <div class="mt-3 flex items-center gap-1.5 text-xs text-red-500">
+                    <span>Izin, Sakit, Alpa</span>
+                    @if ($stats['belum_absen'] > 0)
+                        <span class="text-gray-300">·</span>
+                        <span class="font-semibold text-red-600">{{ number_format($stats['belum_absen']) }}</span>
+                        <span>belum absen</span>
+                    @endif
+                </div>
             </div>
 
+            {{-- Total Kelas --}}
             <div
                 class="group rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-lg hover:shadow-amber-500/5 hover:border-amber-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Kelas</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['total_kelas']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            {{ number_format($stats['total_kelas']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors group-hover:bg-amber-100">
@@ -100,7 +116,8 @@
                 <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                     <h3 class="text-sm font-semibold text-gray-800">Absensi Terakhir</h3>
                     <a href="{{ route('admin.rekap.index') }}"
-                        class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat Rekap →</a>
+                        class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat Rekap
+                        →</a>
                 </div>
                 <div class="divide-y divide-gray-50">
                     @forelse($absensiTerakhir as $absen)
@@ -117,8 +134,7 @@
                             <div class="text-right shrink-0">
                                 <p class="text-xs font-mono text-gray-600">{{ $absen->jam_masuk }}</p>
                                 <span
-                                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium
-                                {{ $absen->status === 'hadir' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium {{ $absen->status === 'hadir' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                                     {{ $absen->statusLabel() }}
                                 </span>
                             </div>

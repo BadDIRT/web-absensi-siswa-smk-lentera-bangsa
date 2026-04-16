@@ -12,6 +12,7 @@ class KelasController extends Controller
     public function index(Request $request)
     {
         $kelases = Kelas::with('jurusan')
+            ->withCount(['siswas as siswa_aktif_count' => fn($q) => $q->where('status', 'aktif')])
             ->when(
                 $request->search,
                 fn($q, $s) =>
@@ -53,6 +54,26 @@ class KelasController extends Controller
         Kelas::create($validated);
 
         return redirect()->route('admin.kelas.index')->with('success', 'Kelas berhasil ditambahkan.');
+    }
+
+    public function show(Kelas $kela)
+    {
+        $kela->load('jurusan');
+
+        $siswas = $kela->siswas()
+            ->with('user')
+            ->where('status', 'aktif')
+            ->orderBy('nama')
+            ->get();
+
+        $stats = [
+            'aktif'       => $kela->siswas()->where('status', 'aktif')->count(),
+            'tidak_aktif' => $kela->siswas()->where('status', 'tidak_aktif')->count(),
+            'pindah'      => $kela->siswas()->where('status', 'pindah')->count(),
+            'lulus'       => $kela->siswas()->where('status', 'lulus')->count(),
+        ];
+
+        return view('admin.kelas.show', compact('kela', 'siswas', 'stats'));
     }
 
     public function edit(Kelas $kela)

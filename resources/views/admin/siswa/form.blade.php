@@ -1,172 +1,217 @@
 @extends('layouts.app')
 
-@section('title', $siswa ?? null ? 'Edit Siswa' : 'Tambah Siswa')
-@section('page-title', $siswa ?? null ? 'Edit Siswa' : 'Tambah Siswa')
+@section('title', $siswa ? 'Edit Siswa — SMK Lentera Bangsa' : 'Tambah Siswa — SMK Lentera Bangsa')
+@section('page-title', $siswa ? 'Edit Data Siswa' : 'Tambah Siswa Baru')
 
 @section('content')
-    <div class="mx-auto max-w-3xl animate-fade-in">
+    <div class="animate-fade-in max-w-3xl">
 
-        <x-page-header :title="$siswa ?? null ? 'Edit Siswa' : 'Tambah Siswa'" :back="route('admin.siswa.index')" />
+        {{-- Breadcrumb --}}
+        <nav class="mb-6 flex items-center gap-1.5 text-xs text-gray-400">
+            <a href="{{ route('admin.siswa.index') }}" class="hover:text-gray-600 transition-colors">Data Siswa</a>
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+            <span class="text-gray-600">{{ $siswa ? 'Edit' : 'Tambah' }}</span>
+        </nav>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6">
-            <form method="POST"
-                action="{{ $siswa ?? null ? route('admin.siswa.update', $siswa) : route('admin.siswa.store') }}">
-                @if ($siswa ?? null)
-                    @method('PUT')
-                @endif
-                @csrf
+        {{-- Form --}}
+        <form method="POST" action="{{ $siswa ? route('admin.siswa.update', $siswa) : route('admin.siswa.store') }}"
+            class="space-y-6">
+            @csrf
+            @if ($siswa)
+                @method('PUT')
+            @endif
 
-                <div class="space-y-5">
-                    {{-- Baris 1: Kelas + NIS --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {{-- Data Utama --}}
+            <div class="rounded-xl border border-gray-200 bg-white">
+                <div class="border-b border-gray-100 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Data Utama</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Informasi dasar dan identitas siswa</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {{-- NIS --}}
                         <div>
-                            <label for="kelas_id" class="mb-1.5 block text-sm font-medium text-gray-700">Kelas</label>
-                            <select id="kelas_id" name="kelas_id" required
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                                <option value="">Pilih Kelas</option>
-                                @foreach ($kelases as $k)
-                                    <option value="{{ $k->id }}"
-                                        {{ old('kelas_id', $siswa->kelas_id ?? '') == $k->id ? 'selected' : '' }}>
-                                        {{ $k->nama }} — {{ $k->jurusan->nama }}</option>
-                                @endforeach
-                            </select>
-                            @error('kelas_id')
-                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="nis" class="mb-1.5 block text-sm font-medium text-gray-700">NIS</label>
-                            <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa->nis ?? '') }}"
-                                required maxlength="20" placeholder="Nomor Induk Siswa"
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-mono">
+                            <label for="nis" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                NIS <span class="text-red-400">*</span>
+                            </label>
+                            <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa?->nis) }}"
+                                required maxlength="20" placeholder="Contoh: 2024001"
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
                             @error('nis')
                                 <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        {{-- NIPD --}}
+                        <div>
+                            <label for="nipd" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                NIPD <span class="text-red-400">*</span>
+                            </label>
+                            <input type="text" id="nipd" name="nipd" value="{{ old('nipd', $siswa?->nipd) }}"
+                                required maxlength="20" placeholder="Contoh: 242510181"
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            @error('nipd')
+                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-[11px] text-gray-400">Digunakan untuk generate kode barcode</p>
+                        </div>
                     </div>
 
-                    {{-- NIPD --}}
+                    {{-- Nama --}}
                     <div>
-                        <label for="nipd" class="mb-1.5 block text-sm font-medium text-gray-700">NIPD</label>
-                        <input type="text" id="nipd" name="nipd" value="{{ old('nipd', $siswa->nipd ?? '') }}"
-                            required maxlength="20" placeholder="Nomor Induk Pokok Digital"
-                            class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 font-mono">
-                        <p class="mt-1 text-xs text-gray-400">Digunakan sebagai isi barcode CODABAR. Contoh: 242510181</p>
-                        @error('nipd')
+                        <label for="nama" class="block text-xs font-medium text-gray-600 mb-1.5">
+                            Nama Lengkap <span class="text-red-400">*</span>
+                        </label>
+                        <input type="text" id="nama" name="nama" value="{{ old('nama', $siswa?->nama) }}"
+                            required maxlength="100" placeholder="Masukkan nama lengkap"
+                            class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        @error('nama')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Baris 2: Nama + JK --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        {{-- Jenis Kelamin --}}
                         <div>
-                            <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700">Nama
-                                Lengkap</label>
-                            <input type="text" id="nama" name="nama"
-                                value="{{ old('nama', $siswa->nama ?? '') }}" required maxlength="100"
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                            @error('nama')
-                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="jenis_kelamin" class="mb-1.5 block text-sm font-medium text-gray-700">Jenis
-                                Kelamin</label>
+                            <label for="jenis_kelamin" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                Jenis Kelamin <span class="text-red-400">*</span>
+                            </label>
                             <select id="jenis_kelamin" name="jenis_kelamin" required
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                                <option value="">Pilih</option>
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                <option value="" disabled {{ !$siswa && !old('jenis_kelamin') ? 'selected' : '' }}>
+                                    Pilih</option>
                                 <option value="L"
-                                    {{ old('jenis_kelamin', $siswa->jenis_kelamin ?? '') === 'L' ? 'selected' : '' }}>
+                                    {{ (old('jenis_kelamin') ?: $siswa?->jenis_kelamin) === 'L' ? 'selected' : '' }}>
                                     Laki-laki</option>
                                 <option value="P"
-                                    {{ old('jenis_kelamin', $siswa->jenis_kelamin ?? '') === 'P' ? 'selected' : '' }}>
+                                    {{ (old('jenis_kelamin') ?: $siswa?->jenis_kelamin) === 'P' ? 'selected' : '' }}>
                                     Perempuan</option>
                             </select>
                             @error('jenis_kelamin')
                                 <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
 
-                    {{-- Baris 3: Tempat + Tanggal Lahir --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        {{-- Kelas --}}
                         <div>
-                            <label for="tempat_lahir" class="mb-1.5 block text-sm font-medium text-gray-700">Tempat
-                                Lahir</label>
-                            <input type="text" id="tempat_lahir" name="tempat_lahir"
-                                value="{{ old('tempat_lahir', $siswa->tempat_lahir ?? '') }}" maxlength="100"
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <label for="kelas_id" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                Kelas <span class="text-red-400">*</span>
+                            </label>
+                            <select id="kelas_id" name="kelas_id" required
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                <option value="" disabled {{ !$siswa && !old('kelas_id') ? 'selected' : '' }}>Pilih
+                                    Kelas</option>
+                                @foreach ($kelases as $k)
+                                    <option value="{{ $k->id }}"
+                                        {{ (old('kelas_id') ?: $siswa?->kelas_id) == $k->id ? 'selected' : '' }}>
+                                        {{ $k->nama }} — {{ $k->jurusan->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('kelas_id')
+                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
                         </div>
+
+                        {{-- Status --}}
                         <div>
-                            <label for="tanggal_lahir" class="mb-1.5 block text-sm font-medium text-gray-700">Tanggal
-                                Lahir</label>
+                            <label for="status" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                Status <span class="text-red-400">*</span>
+                            </label>
+                            <select id="status" name="status" required
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                @foreach (['aktif' => 'Aktif', 'tidak_aktif' => 'Tidak Aktif', 'pindah' => 'Pindah', 'lulus' => 'Lulus'] as $val => $label)
+                                    <option value="{{ $val }}"
+                                        {{ (old('status') ?: $siswa?->status) === $val ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('status')
+                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Data Tambahan --}}
+            <div class="rounded-xl border border-gray-200 bg-white">
+                <div class="border-b border-gray-100 px-6 py-4">
+                    <h3 class="text-sm font-semibold text-gray-800">Data Tambahan</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Informasi kelahiran dan kontak (opsional)</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {{-- Tempat Lahir --}}
+                        <div>
+                            <label for="tempat_lahir" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                Tempat Lahir
+                            </label>
+                            <input type="text" id="tempat_lahir" name="tempat_lahir"
+                                value="{{ old('tempat_lahir', $siswa?->tempat_lahir) }}" maxlength="100"
+                                placeholder="Contoh: Jakarta"
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        </div>
+
+                        {{-- Tanggal Lahir --}}
+                        <div>
+                            <label for="tanggal_lahir" class="block text-xs font-medium text-gray-600 mb-1.5">
+                                Tanggal Lahir
+                            </label>
                             <input type="date" id="tanggal_lahir" name="tanggal_lahir"
-                                value="{{ old('tanggal_lahir', $siswa->tanggal_lahir?->format('Y-m-d') ?? '') }}"
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                value="{{ old('tanggal_lahir', $siswa?->tanggal_lahir?->format('Y-m-d')) }}"
+                                class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
                         </div>
                     </div>
 
                     {{-- Alamat --}}
                     <div>
-                        <label for="alamat" class="mb-1.5 block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="alamat" name="alamat" rows="2"
-                            class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">{{ old('alamat', $siswa->alamat ?? '') }}</textarea>
+                        <label for="alamat" class="block text-xs font-medium text-gray-600 mb-1.5">Alamat</label>
+                        <textarea id="alamat" name="alamat" rows="2" placeholder="Masukkan alamat lengkap"
+                            class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 resize-none">{{ old('alamat', $siswa?->alamat) }}</textarea>
                     </div>
 
-                    {{-- Baris 4: Telepon + Status --}}
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <div>
-                            <label for="no_telepon" class="mb-1.5 block text-sm font-medium text-gray-700">No.
-                                Telepon</label>
-                            <input type="text" id="no_telepon" name="no_telepon"
-                                value="{{ old('no_telepon', $siswa->no_telepon ?? '') }}" maxlength="15"
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                        </div>
-                        <div>
-                            <label for="status" class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
-                            <select id="status" name="status" required
-                                class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                                <option value="aktif"
-                                    {{ old('status', $siswa->status ?? 'aktif') === 'aktif' ? 'selected' : '' }}>Aktif
-                                </option>
-                                <option value="tidak_aktif"
-                                    {{ old('status', $siswa->status ?? '') === 'tidak_aktif' ? 'selected' : '' }}>Tidak
-                                    Aktif</option>
-                                <option value="pindah"
-                                    {{ old('status', $siswa->status ?? '') === 'pindah' ? 'selected' : '' }}>Pindah
-                                </option>
-                                <option value="lulus"
-                                    {{ old('status', $siswa->status ?? '') === 'lulus' ? 'selected' : '' }}>Lulus</option>
-                            </select>
-                        </div>
+                    {{-- No Telepon --}}
+                    <div class="sm:max-w-xs">
+                        <label for="no_telepon" class="block text-xs font-medium text-gray-600 mb-1.5">
+                            No. Telepon
+                        </label>
+                        <input type="text" id="no_telepon" name="no_telepon"
+                            value="{{ old('no_telepon', $siswa?->no_telepon) }}" maxlength="15"
+                            placeholder="08xxxxxxxxxx"
+                            class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        @error('no_telepon')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
                     </div>
+                </div>
+            </div>
 
-                    {{-- Buat Akun (hanya saat create) --}}
-                    @if (!$siswa)
-                        <div class="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="buat_akun" value="1"
-                                    class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500">
-                                <div>
-                                    <span class="text-sm font-medium text-blue-900">Buatkan akun login</span>
-                                    <p class="text-xs text-blue-700/70">Username = NIS, Password = NIS. Akun bisa diubah di
-                                        Pengaturan.</p>
-                                </div>
-                            </label>
-                        </div>
+            {{-- Tombol --}}
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <a href="{{ route('admin.siswa.index') }}"
+                    class="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                    Batal
+                </a>
+                <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500 active:scale-[0.98]">
+                    @if ($siswa)
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                        Simpan Perubahan
+                    @else
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Tambah Siswa
                     @endif
-                </div>
-
-                <div class="mt-6 flex items-center gap-3 border-t border-gray-100 pt-5">
-                    <button type="submit"
-                        class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-500 active:scale-[0.98]">
-                        {{ $siswa ?? null ? 'Simpan Perubahan' : 'Tambah Siswa' }}
-                    </button>
-                    <a href="{{ route('admin.siswa.index') }}"
-                        class="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Batal</a>
-                </div>
-            </form>
-        </div>
-
+                </button>
+            </div>
+        </form>
     </div>
 @endsection

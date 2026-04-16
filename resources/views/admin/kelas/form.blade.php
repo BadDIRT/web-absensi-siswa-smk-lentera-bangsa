@@ -36,7 +36,7 @@
                     <div>
                         <label for="nama" class="mb-1.5 block text-sm font-medium text-gray-700">Nama Kelas</label>
                         <input type="text" id="nama" name="nama" value="{{ old('nama', $kelas->nama ?? '') }}"
-                            required maxlength="50" placeholder="Contoh: X RPL 1"
+                            required maxlength="50" placeholder="Contoh: RPL 1 / TKJ 2 / TKRO 3 / TBSM 4"
                             class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
                         @error('nama')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
@@ -64,7 +64,7 @@
                         <label for="tahun_ajaran" class="mb-1.5 block text-sm font-medium text-gray-700">Tahun
                             Ajaran</label>
                         <input type="text" id="tahun_ajaran" name="tahun_ajaran"
-                            value="{{ old('tahun_ajaran', $kelas->tahun_ajaran ?? '2024/2025') }}" required maxlength="9"
+                            value="{{ old('tahun_ajaran', $kelas->tahun_ajaran ?? '') }}" required maxlength="9"
                             placeholder="2024/2025"
                             class="block w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
                         @error('tahun_ajaran')

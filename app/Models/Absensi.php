@@ -20,6 +20,7 @@ class Absensi extends Model
         'jam_pulang',
         'status',
         'keterangan',
+        'foto_surat', // Tambahkan ini
     ];
 
     protected $casts = [

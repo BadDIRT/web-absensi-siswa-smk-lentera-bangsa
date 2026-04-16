@@ -11,12 +11,13 @@ return new class extends Migration
         Schema::create('absensis', function (Blueprint $table) {
             $table->id();
             $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
-            $table->foreignId('scanned_by')->constrained('users')->cascadeOnDelete(); // scanner
+            $table->foreignId('scanned_by')->nullable(); // scanner
             $table->date('tanggal');
-            $table->time('jam_masuk');
+            $table->time('jam_masuk')->nullable();
             $table->time('jam_pulang')->nullable();
-            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa'])->default('hadir');
+            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa'])->default('alpa');
             $table->string('keterangan')->nullable();
+            $table->string('foto_surat')->nullable();
             $table->timestamp('created_at')->nullable();
         });
     }
@@ -26,6 +27,10 @@ return new class extends Migration
         Schema::dropIfExists('absensis');
         Schema::table('absensis', function (Blueprint $table) {
             $table->dropColumn('jam_pulang');
+        });
+        Schema::table('absensis', function (Blueprint $table) {
+            $table->dropColumn('foto_surat');
+            $table->foreignId('scanned_by')->nullable(false)->change();
         });
     }
 };
