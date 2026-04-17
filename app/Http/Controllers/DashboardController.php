@@ -12,24 +12,20 @@ class DashboardController extends Controller
 {
     public function admin()
     {
+        // 1. TUTUP HARI KEMARIN: Ubah belum_absen -> alpa (jika Admin buka sistem di hari baru)
+        Absensi::finalizeAlpaKemarin();
+
+        // 2. BUKA HARI INI: Buat record belum_absen jika belum ada
+        Absensi::generateBelumAbsenHariIni();
+
         $tanggal = today();
         $totalSiswaAktif = Siswa::where('status', 'aktif')->count();
 
         $hadirHariIni = Absensi::where('tanggal', $tanggal)->where('status', 'hadir')->count();
+        $izinSakit = Absensi::where('tanggal', $tanggal)->whereIn('status', ['izin', 'sakit'])->count();
+        $belumAbsen = Absensi::where('tanggal', $tanggal)->where('status', 'belum_absen')->count();
 
-        // Siswa yang sudah punya record absensi apapun hari ini
-        $sudahDiabsen = Absensi::where('tanggal', $tanggal)->distinct('siswa_id')->count('siswa_id');
-
-        // Belum absen = siswa aktif yang belum ada baris di tabel absensis hari ini
-        $belumAbsen = max(0, $totalSiswaAktif - $sudahDiabsen);
-
-        // Izin + Sakit + Alpa
-        $izinSakitAlpa = Absensi::where('tanggal', $tanggal)
-            ->whereIn('status', ['izin', 'sakit', 'alpa'])
-            ->count();
-
-        // Tidak hadir = izin/sakit/alpa + belum absen sama sekali
-        $tidakHadir = $izinSakitAlpa + $belumAbsen;
+        $tidakHadir = $izinSakit + $belumAbsen;
 
         return view('dashboard.admin', [
             'stats' => [
@@ -41,6 +37,7 @@ class DashboardController extends Controller
             ],
             'absensiTerakhir' => Absensi::with('siswa.kelas')
                 ->where('tanggal', $tanggal)
+                ->where('status', '!=', 'belum_absen')
                 ->latest('jam_masuk')
                 ->take(5)
                 ->get(),
@@ -49,9 +46,13 @@ class DashboardController extends Controller
 
     public function scanner()
     {
+        // Scanner tidak perlu finalize kemarin, cukup generate hari ini
+        Absensi::generateBelumAbsenHariIni();
+
         return view('dashboard.scanner', [
             'recentScans' => Absensi::with('siswa.kelas', 'scanner')
                 ->where('tanggal', today())
+                ->where('status', '!=', 'belum_absen')
                 ->latest('jam_masuk')
                 ->take(10)
                 ->get(),
@@ -70,6 +71,7 @@ class DashboardController extends Controller
         if ($siswa) {
             $riwayatAbsensi = Absensi::where('siswa_id', $siswa->id)
                 ->whereRaw("DATE_FORMAT(tanggal, '%Y-%m') = ?", [$bulan])
+                ->where('status', '!=', 'belum_absen')
                 ->orderByDesc('tanggal')
                 ->get();
 

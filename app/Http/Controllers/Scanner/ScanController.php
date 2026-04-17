@@ -18,7 +18,6 @@ class ScanController extends Controller
 
         $barcode = trim($request->input('barcode'));
 
-        // Validasi: Format CODABAR diawali A, angka 5-20 digit, dan diakhiri A
         if (!preg_match('/^A[0-9]{5,20}A$/', $barcode)) {
             return response()->json([
                 'success' => false,
@@ -30,8 +29,6 @@ class ScanController extends Controller
             ->where('status', 'aktif')
             ->with('kelas')
             ->first();
-
-        // ... bagian bawah (logic masuk/pulang) tetap sama persis ...
 
         if (!$siswa) {
             return response()->json([
@@ -47,14 +44,26 @@ class ScanController extends Controller
             ->where('tanggal', $today)
             ->first();
 
-        if (!$absensi) {
-            Absensi::create([
-                'siswa_id'   => $siswa->id,
-                'scanned_by' => auth()->id(),
-                'tanggal'    => $today,
-                'jam_masuk'  => $now->format('H:i:s'),
-                'status'     => 'hadir',
-            ]);
+        // KASUS 1: Belum ada record atau statusnya masih BELUM ABSEN -> Absen Masuk
+        if (!$absensi || $absensi->status === 'belum_absen') {
+
+            if ($absensi) {
+                // Update record yang sudah ada (status belum_absen -> hadir)
+                $absensi->update([
+                    'scanned_by' => auth()->id(),
+                    'jam_masuk'  => $now->format('H:i:s'),
+                    'status'     => 'hadir',
+                ]);
+            } else {
+                // Fallback: jika ternyata belum ada record sama sekali (jarang terjadi)
+                $absensi = Absensi::create([
+                    'siswa_id'   => $siswa->id,
+                    'scanned_by' => auth()->id(),
+                    'tanggal'    => $today,
+                    'jam_masuk'  => $now->format('H:i:s'),
+                    'status'     => 'hadir',
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -68,7 +77,10 @@ class ScanController extends Controller
                     'time'  => $now->format('H:i:s'),
                 ],
             ]);
-        } elseif (!$absensi->jam_pulang) {
+
+            // KASUS 2: Sudah Hadir, tapi belum Jam Pulang -> Absen Pulang
+        } elseif ($absensi->status === 'hadir' && !$absensi->jam_pulang) {
+
             $absensi->update([
                 'jam_pulang' => $now->format('H:i:s'),
             ]);
@@ -86,11 +98,17 @@ class ScanController extends Controller
                     'jam_pulang' => $now->format('H:i:s'),
                 ],
             ]);
+
+            // KASUS 3: Sudah lengkap (Sudah pulang / Status izin/sakit/alpa)
         } else {
+            $customMsg = ($absensi->status === 'izin' || $absensi->status === 'sakit')
+                ? 'Siswa hari ini tercatat ' . $absensi->statusLabel() . '.'
+                : 'Siswa sudah absen masuk dan pulang hari ini.';
+
             return response()->json([
                 'success' => false,
                 'type'    => 'duplicate',
-                'message' => 'Siswa sudah absen masuk dan pulang hari ini.',
+                'message' => $customMsg,
                 'data'    => [
                     'nama'       => $siswa->nama,
                     'nipd'       => $siswa->nipd,

@@ -48,13 +48,19 @@ Route::middleware(['auth', 'role:siswa'])->get('/dashboard/siswa', [DashboardCon
 */
 Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('jurusan', JurusanController::class); // ← show diaktifkan
+
     Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kela']); // ← show diaktifkan
+
     Route::resource('siswa', SiswaController::class); // ← show diaktifkan
+
     Route::get('barcode', [BarcodeController::class, 'index'])->name('barcode.index');
     Route::post('barcode/{siswa}/generate', [BarcodeController::class, 'generateSingle'])->name('barcode.generate');
     Route::get('barcode/print', [BarcodeController::class, 'print'])->name('barcode.print');
+
     Route::get('rekap', [RekapController::class, 'index'])->name('rekap.index');
     Route::get('rekap/detail', [RekapController::class, 'detail'])->name('rekap.detail');
+    Route::get('rekap/siswa/{siswa}', [RekapController::class, 'siswa'])->name('rekap.siswa');
+
     Route::get('naik-kelas', [NaikKelasController::class, 'index'])->name('naik-kelas.index');
     Route::get('naik-kelas/angkatan', [NaikKelasController::class, 'angkatan'])->name('naik-kelas.angkatan');
     Route::post('naik-kelas/angkatan', [NaikKelasController::class, 'prosesAngkatan'])->name('naik-kelas.angkatan.store');
@@ -62,6 +68,7 @@ Route::middleware(['auth', 'role:administrator'])->prefix('admin')->name('admin.
     Route::post('naik-kelas/per-kelas', [NaikKelasController::class, 'prosesPerKelas'])->name('naik-kelas.per-kelas.store');
     Route::get('naik-kelas/per-siswa', [NaikKelasController::class, 'perSiswa'])->name('naik-kelas.per-siswa');
     Route::post('naik-kelas/per-siswa', [NaikKelasController::class, 'prosesPerSiswa'])->name('naik-kelas.per-siswa.store');
+    
     Route::resource('pengaturan', PengaturanController::class)->parameters(['pengaturan' => 'user']);
 });
 

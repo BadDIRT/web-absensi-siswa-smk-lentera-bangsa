@@ -9,8 +9,7 @@
         {{-- ── Welcome Banner ── --}}
         <div
             class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-800 to-surface-800 p-6 md:p-8">
-            <div class="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-brand-500/10 blur-3xl">
-            </div>
+            <div class="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-brand-500/10 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-accent-500/8 blur-3xl">
             </div>
             <div class="relative">
@@ -31,8 +30,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Siswa</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ number_format($stats['total_siswa']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['total_siswa']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-100">
@@ -48,8 +46,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Hadir Hari Ini</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ number_format($stats['hadir_hari_ini']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['hadir_hari_ini']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100">
@@ -68,8 +65,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Tidak Hadir</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ number_format($stats['tidak_hadir']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['tidak_hadir']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 transition-colors group-hover:bg-red-100">
@@ -95,8 +91,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Kelas</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ number_format($stats['total_kelas']) }}</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($stats['total_kelas']) }}</p>
                     </div>
                     <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition-colors group-hover:bg-amber-100">
@@ -116,11 +111,20 @@
                 <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                     <h3 class="text-sm font-semibold text-gray-800">Absensi Terakhir</h3>
                     <a href="{{ route('admin.rekap.index') }}"
-                        class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat Rekap
-                        →</a>
+                        class="text-xs font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat Rekap →</a>
                 </div>
                 <div class="divide-y divide-gray-50">
                     @forelse($absensiTerakhir as $absen)
+                        @php
+                            // PERBAIKAN: Warna badge dinamis berdasarkan status
+                            $statusColor = match ($absen->status) {
+                                'hadir' => 'bg-green-50 text-green-700',
+                                'izin' => 'bg-blue-50 text-blue-700',
+                                'sakit' => 'bg-amber-50 text-amber-700',
+                                'alpa' => 'bg-red-50 text-red-700',
+                                default => 'bg-gray-100 text-gray-500',
+                            };
+                        @endphp
                         <div class="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50/50 transition-colors">
                             <div
                                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-700">
@@ -132,9 +136,14 @@
                                     {{ $absen->siswa->kelas->nama }}</p>
                             </div>
                             <div class="text-right shrink-0">
-                                <p class="text-xs font-mono text-gray-600">{{ $absen->jam_masuk }}</p>
+                                <p class="text-xs font-mono text-gray-600">
+                                    {{ $absen->jam_masuk ?? '—' }}
+                                    @if ($absen->jam_pulang)
+                                        <span class="text-gray-400"> → {{ $absen->jam_pulang }}</span>
+                                    @endif
+                                </p>
                                 <span
-                                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium {{ $absen->status === 'hadir' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                                    class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium {{ $statusColor }}">
                                     {{ $absen->statusLabel() }}
                                 </span>
                             </div>
@@ -159,38 +168,31 @@
                 <div class="space-y-1 p-3">
                     <a href="{{ route('admin.siswa.create') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="users" class="w-4 h-4" />
-                        Tambah Siswa Baru
+                        <x-icon name="users" class="w-4 h-4" /> Tambah Siswa Baru
                     </a>
                     <a href="{{ route('admin.barcode.index') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="barcode" class="w-4 h-4" />
-                        Lihat Barcode Siswa
+                        <x-icon name="barcode" class="w-4 h-4" /> Lihat Barcode Siswa
                     </a>
                     <a href="{{ route('admin.rekap.index') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="chart" class="w-4 h-4" />
-                        Rekap Absensi Hari Ini
+                        <x-icon name="chart" class="w-4 h-4" /> Rekap Absensi Hari Ini
                     </a>
                     <a href="{{ route('admin.kelas.create') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="building" class="w-4 h-4" />
-                        Tambah Kelas
+                        <x-icon name="building" class="w-4 h-4" /> Tambah Kelas
                     </a>
                     <a href="{{ route('admin.jurusan.create') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="book" class="w-4 h-4" />
-                        Tambah Jurusan
+                        <x-icon name="book" class="w-4 h-4" /> Tambah Jurusan
                     </a>
                     <a href="{{ route('admin.pengaturan.index') }}"
                         class="flex items-center gap-3 rounded-lg p-3 text-sm text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700">
-                        <x-icon name="gear" class="w-4 h-4" />
-                        Kelola Pengguna
+                        <x-icon name="gear" class="w-4 h-4" /> Kelola Pengguna
                     </a>
                 </div>
             </div>
 
         </div>
-
     </div>
 @endsection

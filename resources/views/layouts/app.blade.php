@@ -72,10 +72,12 @@
                 @endif
 
                 @yield('content')
-            </main>
 
-            {{-- Footer (Partial) --}}
-            @include('partials.footer')
+                {{-- DIPINDAHKAN KE SINI: Footer sekarang ikut tergulir bersama konten --}}
+                <div class="-mx-4 -mb-4 md:-mx-6 md:-mb-6 lg:-mx-8 lg:-mb-8 mt-8">
+                    @include('partials.footer')
+                </div>
+            </main>
 
         </div>
     </div>

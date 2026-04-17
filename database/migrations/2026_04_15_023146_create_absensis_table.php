@@ -15,7 +15,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
             $table->time('jam_pulang')->nullable();
-            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa'])->default('alpa');
+            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa', 'belum_absen'])->default('belum_absen');
             $table->string('keterangan')->nullable();
             $table->string('foto_surat')->nullable();
             $table->timestamp('created_at')->nullable();
@@ -30,7 +30,6 @@ return new class extends Migration
         });
         Schema::table('absensis', function (Blueprint $table) {
             $table->dropColumn('foto_surat');
-            $table->foreignId('scanned_by')->nullable(false)->change();
         });
     }
 };

@@ -14,12 +14,12 @@ class PengajuanController extends Controller
         $user = auth()->user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
-        // Cek apakah sudah ada catatan absensi hari ini
-        $sudahAbsen = $siswa
-            ? Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->exists()
-            : true;
+        // Cek apakah status hari ini masih belum_absen
+        $bisaAjukan = $siswa
+            ? Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->where('status', 'belum_absen')->exists()
+            : false;
 
-        return view('siswa.pengajuan', compact('siswa', 'sudahAbsen'));
+        return view('siswa.pengajuan', compact('siswa', 'bisaAjukan'));
     }
 
     public function store(Request $request)
@@ -30,9 +30,14 @@ class PengajuanController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan.');
         }
 
-        // Cegah double pengajuan di hari yang sama
-        if (Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->exists()) {
-            return back()->with('error', 'Anda sudah memiliki catatan absensi atau pengajuan hari ini.');
+        // Cari record belum_absen hari ini
+        $absensi = Absensi::where('siswa_id', $siswa->id)
+            ->where('tanggal', today())
+            ->where('status', 'belum_absen')
+            ->first();
+
+        if (!$absensi) {
+            return back()->with('error', 'Gagal mengajukan. Anda sudah memiliki catatan absensi hari ini.');
         }
 
         $validated = $request->validate([
@@ -42,10 +47,6 @@ class PengajuanController extends Controller
         ]);
 
         $data = [
-            'siswa_id'   => $siswa->id,
-            'scanned_by' => null, // Null karena diajukan mandiri, bukan oleh scanner
-            'tanggal'    => today(),
-            'jam_masuk'  => null,
             'status'     => $validated['jenis'],
             'keterangan' => $validated['keterangan'],
         ];
@@ -54,7 +55,8 @@ class PengajuanController extends Controller
             $data['foto_surat'] = $request->file('foto_surat')->store('surat-sakit', 'public');
         }
 
-        Absensi::create($data);
+        // UPDATE record, bukan CREATE baru
+        $absensi->update($data);
 
         return redirect()->route('dashboard.siswa')->with('success', 'Pengajuan ' . $validated['jenis'] . ' berhasil dikirim.');
     }

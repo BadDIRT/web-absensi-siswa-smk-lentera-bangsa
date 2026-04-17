@@ -26,20 +26,38 @@
                     @endforeach
                 </select>
             </div>
+
+            {{-- DITAMBAHKAN: Filter Tingkat --}}
+            <div>
+                <label class="mb-1 block text-xs font-medium text-gray-500">Tingkat</label>
+                <select name="tingkat" onchange="this.form.submit()"
+                    class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                    <option value="">Semua</option>
+                    <option value="10" {{ $tingkat == 10 ? 'selected' : '' }}>X (10)</option>
+                    <option value="11" {{ $tingkat == 11 ? 'selected' : '' }}>XI (11)</option>
+                    <option value="12" {{ $tingkat == 12 ? 'selected' : '' }}>XII (12)</option>
+                </select>
+            </div>
+
             <div>
                 <label class="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
                 <select name="kelas_id" onchange="this.form.submit()"
                     class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
                     <option value="">Semua</option>
                     @foreach ($kelasList as $k)
-                        <option value="{{ $k->id }}" {{ $kelasId == $k->id ? 'selected' : '' }}>{{ $k->nama }}
+                        {{-- DIPERBAIKI: Menampilkan Nama Kelas + Tahun Ajaran --}}
+                        <option value="{{ $k->id }}" {{ $kelasId == $k->id ? 'selected' : '' }}>
+                            {{ $k->nama }} — {{ $k->tahun_ajaran }}
                         </option>
                     @endforeach
                 </select>
             </div>
+
             <button type="submit"
                 class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-500 transition-colors">Tampilkan</button>
-            @if (request('tanggal') || request('jurusan_id') || request('kelas_id'))
+
+            {{-- DIPERBAIKI: Tambahkan kondisi reset jika ada filter tingkat --}}
+            @if (request('tanggal') || request('jurusan_id') || request('kelas_id') || request('tingkat'))
                 <a href="{{ route('admin.rekap.index') }}"
                     class="rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 transition-colors">Reset</a>
             @endif
@@ -47,7 +65,7 @@
 
         {{-- Ringkasan Total --}}
         @if ($totalAll)
-            <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                 <div class="rounded-lg bg-gray-50 px-4 py-3 text-center">
                     <p class="text-xl font-bold text-gray-800">{{ $totalAll['total'] ?? 0 }}</p>
                     <p class="text-xs text-gray-400">Total</p>
@@ -67,6 +85,10 @@
                 <div class="rounded-lg bg-red-50 px-4 py-3 text-center">
                     <p class="text-xl font-bold text-red-700">{{ $totalAll['alpa'] ?? 0 }}</p>
                     <p class="text-xs text-red-600">Alpa</p>
+                </div>
+                <div class="rounded-lg bg-slate-100 px-4 py-3 text-center">
+                    <p class="text-xl font-bold text-slate-600">{{ $totalAll['belum'] ?? 0 }}</p>
+                    <p class="text-xs text-slate-500">Belum Absen</p>
                 </div>
             </div>
         @endif
@@ -96,13 +118,17 @@
                 <tbody class="divide-y divide-gray-50">
                     @forelse($rekap as $item)
                         <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-3 font-medium text-gray-800">{{ $item['kelas']->nama }}</td>
+                            {{-- DIPERBAIKI: Tampilkan Tahun Ajaran di tabel utama juga agar jelas konteksnya --}}
+                            <td class="px-6 py-3">
+                                <p class="font-medium text-gray-800">{{ $item['kelas']->nama }}</p>
+                                <p class="text-[11px] text-gray-400">Angkatan {{ $item['kelas']->tahun_ajaran }}</p>
+                            </td>
                             <td class="px-6 py-3 text-center text-gray-600">{{ $item['total'] }}</td>
                             <td class="px-6 py-3 text-center font-medium text-green-700">{{ $item['hadir'] }}</td>
                             <td class="px-6 py-3 text-center font-medium text-blue-700">{{ $item['izin'] }}</td>
                             <td class="px-6 py-3 text-center font-medium text-amber-700">{{ $item['sakit'] }}</td>
                             <td class="px-6 py-3 text-center font-medium text-red-700">{{ $item['alpa'] }}</td>
-                            <td class="px-6 py-3 text-center text-gray-400">{{ $item['belum'] }}</td>
+                            <td class="px-6 py-3 text-center font-medium text-slate-500">{{ $item['belum'] }}</td>
                             <td class="px-6 py-3 text-right">
                                 <a href="{{ route('admin.rekap.detail', ['tanggal' => $tanggal, 'kelas_id' => $item['kelas']->id]) }}"
                                     class="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">Lihat</a>
@@ -111,7 +137,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="px-6 py-16 text-center text-sm text-gray-400">Tidak ada data untuk
-                                tanggal ini.</td>
+                                filter ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -20,15 +20,19 @@
                         <p class="mt-1 text-sm text-brand-200/70">Akun belum terhubung dengan data siswa.</p>
                     @endif
                 </div>
+
                 @php
                     $sudahAbsen = $siswa
-                        ? \App\Models\Absensi::where('siswa_id', $siswa->id)->where('tanggal', today())->exists()
+                        ? \App\Models\Absensi::where('siswa_id', $siswa->id)
+                            ->where('tanggal', today())
+                            ->where('status', '!=', 'belum_absen')
+                            ->exists()
                         : false;
                 @endphp
+
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     <div
-                        class="flex items-center gap-2 rounded-lg px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10
-                    {{ $sudahAbsen ? 'bg-green-500/20' : 'bg-white/10' }}">
+                        class="flex items-center gap-2 rounded-lg px-4 py-2.5 backdrop-blur-sm ring-1 ring-white/10 {{ $sudahAbsen ? 'bg-green-500/20' : 'bg-white/10' }}">
                         <span
                             class="flex h-2.5 w-2.5 rounded-full {{ $sudahAbsen ? 'bg-green-400' : 'bg-amber-400' }}"></span>
                         <span class="text-sm font-medium text-white">
@@ -36,7 +40,6 @@
                         </span>
                     </div>
 
-                    {{-- TOMBOL AJUKAN IZIN/SAKIT (Hanya muncul jika belum absen dan akun terhubung siswa) --}}
                     @if (!$sudahAbsen && $siswa)
                         <a href="{{ route('siswa.pengajuan.create') }}"
                             class="inline-flex items-center gap-2 rounded-lg bg-white/20 px-4 py-2.5 text-sm font-medium text-white backdrop-blur-sm ring-1 ring-white/20 hover:bg-white/30 transition-colors">
@@ -83,6 +86,8 @@
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Tanggal</th>
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Jam Masuk
                             </th>
+                            <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Jam Pulang
+                            </th> {{-- DITAMBAHKAN --}}
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400 text-center">
                                 Status</th>
                             <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Keterangan
@@ -102,7 +107,10 @@
                             @endphp
                             <tr class="hover:bg-gray-50/50 transition-colors">
                                 <td class="px-6 py-3.5 text-gray-700">{{ $absensi->tanggal->format('d M Y') }}</td>
-                                <td class="px-6 py-3.5 font-mono text-xs text-gray-600">{{ $absensi->jam_masuk }}</td>
+                                <td class="px-6 py-3.5 font-mono text-xs text-gray-600">{{ $absensi->jam_masuk ?? '—' }}
+                                </td>
+                                <td class="px-6 py-3.5 font-mono text-xs text-gray-600">{{ $absensi->jam_pulang ?? '—' }}
+                                </td> {{-- DITAMBAHKAN --}}
                                 <td class="px-6 py-3.5 text-center">
                                     <span
                                         class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $color }}">{{ $absensi->statusLabel() }}</span>
@@ -111,7 +119,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-16 text-center">
+                                <td colspan="5" class="px-6 py-16 text-center"> {{-- colspan diubah jadi 5 --}}
                                     <div class="flex flex-col items-center">
                                         <div
                                             class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-300 mb-3">
@@ -136,7 +144,7 @@
                 <div>
                     <h4 class="text-sm font-semibold text-brand-800">Cara Melakukan Absensi</h4>
                     <p class="mt-1 text-sm text-brand-700/70 leading-relaxed">
-                        Tunjukkan barcode CODABAR Anda yang terdapat pada kartu siswa ke petugas scanner di gerbang sekolah.
+                        Tunjukkan barcode yang terdapat pada kartu siswa ke petugas scanner di gerbang sekolah.
                         Absensi akan tercatat secara otomatis saat barcode berhasil dipindai.
                     </p>
                 </div>

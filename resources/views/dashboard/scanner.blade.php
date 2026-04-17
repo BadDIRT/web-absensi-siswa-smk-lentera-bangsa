@@ -667,8 +667,10 @@
                         try {
                             const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
                             if (!csrf) throw new Error('No CSRF');
+
                             const ctrl = new AbortController();
                             const tid = setTimeout(() => ctrl.abort(), 15000);
+
                             const res = await fetch('{{ route('scanner.process') }}', {
                                 method: 'POST',
                                 headers: {
@@ -681,8 +683,15 @@
                                 }),
                                 signal: ctrl.signal
                             });
+
                             clearTimeout(tid);
-                            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                            // PERBAIKAN ADA DI SINI: Parse error message dari backend jika status bukan 2xx
+                            if (!res.ok) {
+                                const errData = await res.json().catch(() => null);
+                                throw new Error(errData?.message || 'Terjadi kesalahan server.');
+                            }
+
                             const result = await res.json();
 
                             if (result.success) {
@@ -707,12 +716,13 @@
                                         `${detail ? ' · Masuk ' : 'Masuk '}${result.data.jam_masuk}`;
                                     if (result.data.jam_pulang) detail += ' → Pulang ' + result.data.jam_pulang;
                                 }
+                                // Notifikasi akan otomatis berubah jadi Warning (kuning) jika backend mengirim type: "duplicate" (misal saat siswa sudah status izin/sakit)
                                 this.notify(result.type === 'duplicate' ? 'warning' : 'error', result.message || 'Gagal',
                                     detail);
                             }
                         } catch (e) {
-                            this.notify('error', e.name === 'AbortError' ? 'Server tidak merespon.' :
-                                'Gagal mengirim data.');
+                            // PERBAIKAN: Menampilkan pesan error yang sudah di-catch di atas
+                            this.notify('error', e.name === 'AbortError' ? 'Server tidak merespon.' : e.message);
                         } finally {
                             this.processing = false;
                         }
