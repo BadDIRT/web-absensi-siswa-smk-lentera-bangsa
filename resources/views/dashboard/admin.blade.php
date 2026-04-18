@@ -8,7 +8,7 @@
 
         {{-- ── Welcome Banner ── --}}
         <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-800 to-surface-800 p-6 md:p-8">
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-700 via-blue-800 to-red-800 p-6 md:p-8">
             <div class="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-full bg-brand-500/10 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-accent-500/8 blur-3xl">
             </div>

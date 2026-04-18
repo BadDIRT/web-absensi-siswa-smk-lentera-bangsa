@@ -8,7 +8,7 @@
 
         {{-- ── Welcome Card ── --}}
         <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 p-6 md:p-8">
+            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-brand-700 to-red-800 p-6 md:p-8">
             <div class="pointer-events-none absolute -right-6 -top-6 h-40 w-40 rounded-full bg-accent-500/10 blur-3xl"></div>
             <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>

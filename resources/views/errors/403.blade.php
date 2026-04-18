@@ -18,7 +18,7 @@
         <p class="mt-2 text-sm text-gray-500">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
         <a href="{{ route('login') }}"
             class="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-brand-500">
-            Kembali ke Login
+            Kembali ke Halaman
         </a>
     </div>
 </body>

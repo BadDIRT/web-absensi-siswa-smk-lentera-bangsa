@@ -54,11 +54,11 @@
     {{-- ── Brand Area ── --}}
     <div class="flex h-16 items-center gap-3 border-b border-white/5 px-5">
         <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white ring-1 ring-white/10">
-            <img src="{{ Vite::asset('resources/images/logo.png') }}" alt="Logo SMK Lentera Bangsa"
+            <img src="{{ Vite::asset('resources/images/logo.png') }}" alt="Logo SMKS Lentera Bangsa"
                 class="h-8 w-8 rounded">
         </div>
         <div class="flex flex-col">
-            <span class="text-sm font-bold leading-tight text-white tracking-wide">SMK Lentera Bangsa</span>
+            <span class="text-sm font-bold leading-tight text-white tracking-wide">SMKS Lentera Bangsa</span>
             <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-red-400">Sistem Absensi</span>
         </div>
         <button class="ml-auto rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"

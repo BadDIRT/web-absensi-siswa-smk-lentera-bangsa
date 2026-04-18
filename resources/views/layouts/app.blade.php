@@ -46,7 +46,7 @@
             @include('partials.header')
 
             {{-- Scrollable Content Area --}}
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <main class="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 lg:p-8">
                 @if (session('success'))
                     <div
                         class="mb-6 flex items-center gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800 animate-slide-up">
@@ -73,8 +73,8 @@
 
                 @yield('content')
 
-                {{-- DIPINDAHKAN KE SINI: Footer sekarang ikut tergulir bersama konten --}}
-                <div class="-mx-4 -mb-4 md:-mx-6 md:-mb-6 lg:-mx-8 lg:-mb-8 mt-8">
+                {{-- Footer dibungkus mt-auto agar selalu menempel ke bawah jika konten sedikit --}}
+                <div class="-mx-4 -mb-4 md:-mx-6 md:-mb-6 lg:-mx-8 lg:-mb-8 mt-auto">
                     @include('partials.footer')
                 </div>
             </main>
